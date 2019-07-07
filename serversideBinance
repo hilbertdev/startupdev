@@ -1,0 +1,47 @@
+function myFunction(endPoint, method, queryString) {
+/* jshint esnext:true */
+
+//Converting byte array to hexadecimals
+function bytesToHex(data){
+  return data.map(function(e){
+    var v = (e < 0 ? e + 256 : e).toString(16);
+    return v.length == 1 ? "0" + v : v; 
+    
+  }).join("");
+}
+//////////////////////////
+  
+var burl = "https://api.binance.com";
+var dataQueryString = queryString;
+  
+//  Use your secretKey as the key and totalParams as the value for the HMAC operation.// 
+//The signature is not case sensitive.
+//totalParams is defined as the query string concatenated with the request body
+ var keys = {
+    "akey" : AKEY,
+    "skey" : SKEY
+};
+
+var url = burl + endPoint + '?' + dataQueryString;
+   
+ var headers = {
+  'X-MBX-APIKEY': keys['akey']
+ };
+ //console.log(headers);
+
+ var params = {
+   'method': method,
+   'headers': headers,
+   'muteHttpExceptions': true
+ };
+  
+var totalParams = UrlFetchApp.getRequest(url,params);
+//console.log(keys.skey);
+var signature = Utilities.computeHmacSignature(Utilities.MacAlgorithm.HMAC_SHA_256, dataQueryString, keys.skey);
+var sig = bytesToHex(signature);
+url +=  '&signature=' + sig;
+ return JSON.parse(UrlFetchApp.fetch(url, params));
+}
+
+
+
